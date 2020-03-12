@@ -2,4 +2,12 @@
 
 cd "$(readlink -f "$(dirname "$0")")" || exit 9
 
-docker build -t postlu/pmp .
+IMAGE=postlu/pmp
+
+docker build -t "$IMAGE" .
+
+case "$1" in
+  push|p|--push|-p)
+    docker push "$IMAGE"
+    ;;
+esac
