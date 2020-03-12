@@ -1,6 +1,8 @@
 FROM ubuntu:18.04
 
-ENV PMP_HOME=/srv/PMP \
+ARG PMP_HOME=/srv/PMP
+
+ENV PMP_HOME=${PMP_HOME} \
     SERVER_STATE=master \
     TIMEOUT_DB=60 \
     TIMEOUT_PMP=300
