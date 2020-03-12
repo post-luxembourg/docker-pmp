@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ARG PMP_HOME=/srv/PMP
+ARG PMP_HOME=/srv/pmp
 
 ENV PMP_HOME=${PMP_HOME} \
     SERVER_STATE=master \
@@ -32,7 +32,7 @@ RUN apt-get update && \
     curl -fsSL -o /tmp/pmp_installer.bin "$url" && \
     md5sum -c /tmp/pmp_installer.bin.md5sum && \
     chmod +x /tmp/pmp_installer.bin /usr/bin/wait-for-it.sh && \
-    sed -i "s|/srv/PMP|${PMP_HOME}|" /tmp/pmp.properties && \
+    sed -i "s|/srv/pmp|${PMP_HOME}|" /tmp/pmp.properties && \
     /tmp/pmp_installer.bin -i silent -f /tmp/pmp.properties && \
     rm -rf "${PMP_HOME}/logs" && \
     mkdir -p /data/logs /data/backups && \
