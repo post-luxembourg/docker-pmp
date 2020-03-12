@@ -19,9 +19,7 @@ docker-compose up
 
 ## Build
 
-### Locally
-
-#### GitHub Actions
+### GitHub Actions
 
 To manually trigger a GitHub Actions:
 
@@ -36,6 +34,8 @@ echo "GITHUB_PERSONAL_ACCESS_TOKEN=$TOKEN" > .envrc
 ```bash
 ./gh-actions-trigger-build.sh
 ```
+
+### Locally
 
 #### With docker buildx (recommended)
 
