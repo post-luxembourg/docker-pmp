@@ -6,28 +6,48 @@
 
 1. Copy and edit the db config:
 
-```
+```bash
 cp postgres.env.sample postgres.env
 vim postgres.env
 ```
 
 2. Run
 
-```
+```bash
 docker-compose up
 ```
 
 ## Build
 
-### With docker buildx (recommended)
+### Locally
 
+#### GitHub Actions
+
+To manually trigger a GitHub Actions:
+
+1. Create a GitHub Personal Access Token and store it in `.envrc`:
+
+```bash
+echo "GITHUB_PERSONAL_ACCESS_TOKEN=$TOKEN" > .envrc
 ```
+
+2. Execute:
+
+```bash
+./gh-actions-trigger-build.sh
+```
+
+#### With docker buildx (recommended)
+
+```bash
 ./buildx.sh
 ```
 
-### Without docker buildx (NOT recommended)
+#### Without docker buildx (NOT recommended)
 
-```
+Please note that there is **no multiarch** support using this method.
+
+```bash
 ./build.sh
 ```
 
