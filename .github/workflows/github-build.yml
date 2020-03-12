@@ -2,6 +2,7 @@ name: GitHub Actions CI
 
 on:
   push:
+  repository_dispatch:
   schedule:
     - cron:  '0 8 * * *'
 
