@@ -17,6 +17,20 @@ vim postgres.env
 docker-compose up
 ```
 
+## Build
+
+### With docker buildx (recommended)
+
+```
+./buildx.sh
+```
+
+### Without docker buildx (NOT recommended)
+
+```
+./build.sh
+```
+
 ## Similar projects
 
 - https://github.com/babim/docker-me-pmp
