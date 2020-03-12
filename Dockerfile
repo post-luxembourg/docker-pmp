@@ -14,13 +14,21 @@ RUN apt-get update && \
       -o /usr/bin/wait-for-it.sh && \
     if [ "$(dpkg --print-architecture)" = "i386" ]; \
     then \
-      url=https://www.manageengine.com/products/passwordmanagerpro/8621641/ManageEngine_PMP.bin; \
+      install_bin=ManageEngine_PMP.bin; \
     else \
-      url=https://www.manageengine.com/products/passwordmanagerpro/8621641/ManageEngine_PMP_64bit.bin; \
+      install_bin=ManageEngine_PMP_64bit.bin; \
     fi && \
+    echo "Grabbing md5 checksum from manageengine.com" && \
+    curl -fsSL "https://www.manageengine.com/products/passwordmanagerpro/download.html" | \
+      sed -n '/<!--PMP MD5SUM-->/,/<!--PMP MD5SUM-->/p;' | \
+      sed -rn "/$install_bin/s/.*[<>]([^><]{32})[<>].+/\1/p" | \
+      tr -d '\n' > /tmp/pmp_installer.bin.md5sum && \
+    echo " /tmp/pmp_installer.bin" >> /tmp/pmp_installer.bin.md5sum && \
+    cat /tmp/pmp_installer.bin.md5sum && \
+    url="https://www.manageengine.com/products/passwordmanagerpro/8621641/${install_bin}" && \
     echo "Downloading PMP installer from $url" && \
     curl -fsSL -o /tmp/pmp_installer.bin "$url" && \
-    rm -rf /var/lib/apt/lists/* && \
+    md5sum -c /tmp/pmp_installer.bin.md5sum && \
     chmod +x /tmp/pmp_installer.bin /usr/bin/wait-for-it.sh && \
     /tmp/pmp_installer.bin -i silent -f /tmp/pmp.properties && \
     rm -rf "${PMP_HOME}/logs" && \
@@ -29,7 +37,10 @@ RUN apt-get update && \
     ln -sf /data/backups "${PMP_HOME}/Backup" && \
     cd "${PMP_HOME}/bin" && \
     bash pmp.sh install | grep "installed successfully" && \
-    rm -rf /tmp/pmp_installer.bin /tmp/pmp.properties
+    rm -rf /var/lib/apt/lists/* \
+      /tmp/pmp_installer.bin \
+      /tmp/pmp_installer.bin.md5sum \
+      /tmp/pmp.properties
 
 WORKDIR ${PMP_HOME}
 
