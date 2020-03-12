@@ -2,3 +2,4 @@ ManageEngine_PMP_*
 postgres.env
 config/
 data/
+.envrc
