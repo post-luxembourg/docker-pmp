@@ -1,0 +1,33 @@
+---
+version: "3.3"
+services:
+  pmp:
+    build: .
+    image: postlu/pmp
+    restart: unless-stopped
+    container_name: pmp
+    hostname: pmp
+    ports:
+      - "5522:5522"
+      - "7070:7070"
+      - "7272:7272"
+      - "7273:7273"
+    env_file:
+      - postgres.env
+    volumes:
+      - ./config/pmp:/config
+      - ./data/pmp:/data
+      # DEVEL
+      - ./entrypoint.sh:/entrypoint.sh
+
+  database:
+    # The PMP appliance ships with psql 9.5
+    # image: postgres:9.5
+    image: postgres:12
+    #command: -c ssl=on -c ssl_cert_file=/var/lib/postgresql/wildcard.dt.ept.lu.crt -c ssl_key_file=/var/lib/postgresql/wildcard.dt.ept.lu.key
+    restart: unless-stopped
+    container_name: pmp-db
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+    env_file:
+      - postgres.env
