@@ -4,6 +4,15 @@
 
 ## Setup
 
+1. Copy and edit the db config:
+
+```
+cp postgres.env.sample postgres.env
+vim postgres.env
+```
+
+2. Run
+
 ```
 docker-compose up
 ```
