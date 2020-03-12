@@ -10,6 +10,8 @@ ENV PMP_HOME=${PMP_HOME} \
 COPY pmp.properties /tmp/pmp.properties
 COPY entrypoint.sh /entrypoint.sh
 
+# ADD ./ManageEngine_PMP_64bit.bin /tmp/pmp_installer.bin
+
 RUN apt-get update && \
     apt-get install -y curl unzip && \
     curl -fsSL https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
@@ -32,8 +34,18 @@ RUN apt-get update && \
     curl -fsSL -o /tmp/pmp_installer.bin "$url" && \
     md5sum -c /tmp/pmp_installer.bin.md5sum && \
     chmod +x /tmp/pmp_installer.bin /usr/bin/wait-for-it.sh && \
+    # Update PMP_HOME in properties
     sed -i "s|/srv/pmp|${PMP_HOME}|" /tmp/pmp.properties && \
     /tmp/pmp_installer.bin -i silent -f /tmp/pmp.properties && \
+    # If PMP_HOME does not end with a PMP dir then it get installed
+    # in PMP_HOME/PMP
+    if [ "$(basename $PMP_HOME)" != "PMP" ]; \
+    then \
+      mv "${PMP_HOME}/PMP" "/tmp/pmp.tmp" && \
+      mv "${PMP_HOME}" "/tmp/pmp_deleteme" && \
+      rmdir "/tmp/pmp_deleteme" && \
+      mv "/tmp/pmp.tmp" "${PMP_HOME}"; \
+    fi && \
     rm -rf "${PMP_HOME}/logs" && \
     mkdir -p /data/logs /data/backups && \
     ln -sf /data/logs "${PMP_HOME}/logs" && \
