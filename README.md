@@ -1,14 +1,14 @@
 # ManageEngine Password Manager Pro
 
-## Setup
+![GitHub Actions CI](https://github.com/post-luxembourg/docker-pmp/workflows/GitHub%20Actions%20CI/badge.svg)
 
-### Locally
+## Setup
 
 ```
 docker-compose up
 ```
 
-### Similar projects
+## Similar projects
 
 - https://github.com/babim/docker-me-pmp
 - https://github.com/babim/docker-tag-options/tree/master/z%20ManageEngine
