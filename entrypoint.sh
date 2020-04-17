@@ -10,10 +10,6 @@ SERVER_STATE=${SERVER_STATE:-master}
 TIMEOUT_DB=${TIMEOUT_DB:-60}
 TIMEOUT_PMP=${TIMEOUT_PMP:-300}
 
-set_server_state() {
-  echo "$SERVER_STATE" > "${PMP_HOME}/conf/serverstate.conf"
-}
-
 db_setup() {
   local db_conf="${PMP_HOME}/conf/database_params.conf"
 
@@ -28,14 +24,12 @@ db_setup() {
   # Disable startup of internal DB
   sed -ri 's|(.*name="StartDBServer" value=").+|\1false"/>|' \
     "${PMP_HOME}/conf/customer-config.xml"
-
-  # Update enc key location if there's one in /config
-  set_enc_key_location
 }
 
 symlink_default_backup_dir() {
   # Symlink default database backup location to /data volume
   mkdir -p /data/backups
+
   if ! [[ -L "${PMP_HOME}/Backup" ]]
   then
     ln -sf "/data/backups" "${PMP_HOME}/Backup"
@@ -44,11 +38,41 @@ symlink_default_backup_dir() {
 
 symlink_logs_dir() {
   mkdir -p /data/logs
+
   if ! [[ -L "${PMP_HOME}/logs" ]]
   then
     ln -sf "/data/logs" "${PMP_HOME}/logs"
   fi
+}
 
+init_data_dir() {
+  symlink_logs_dir
+  symlink_default_backup_dir
+}
+
+set_server_state() {
+  echo "$SERVER_STATE" > "${PMP_HOME}/conf/serverstate.conf"
+}
+
+init_conf_dir() {
+  local lockfile=/config/.INIT_SYNC_DONE
+
+  if ! [[ -e "$lockfile" ]]
+  then
+    echo "Copying config files to /config"
+    if cp -a "${PMP_HOME}/conf.orig/"* /config
+    then
+      touch "$lockfile"
+    fi
+  fi
+
+  # Ensure PMP_HOME/conf is symlinked to /config
+  if ! [[ -L "${PMP_HOME}/conf" ]]
+  then
+    ln -sf /conf "${PMP_HOME}/conf"
+  fi
+
+  set_server_state
 }
 
 wait_for_db() {
@@ -79,44 +103,19 @@ pmp_is_running() {
   /etc/init.d/pmp-service status | grep -q "PMP is running"
 }
 
-set_enc_key_location() {
-  # Set encryption key location
-  local pmp_key_vol="/config/pmp_key.key"
-
-  if [[ -e "$pmp_key_vol" ]]
-  then
-    echo "$pmp_key_vol" > "${PMP_HOME}/conf/manage_key.conf"
-  fi
-}
-
-save_enc_key() {
-  local pmp_key="${PMP_HOME}/conf/pmp_key.key"
-  local pmp_key_vol="/config/pmp_key.key"
-
-  if [[ -e "$pmp_key" ]]
-  then
-    echo "Move pmp_key.key to /config"
-    echo "$pmp_key_vol" > "${PMP_HOME}/conf/manage_key.conf"
-    mv "$pmp_key" "$pmp_key_vol"
-  fi
-}
-
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
 then
-  set_server_state
+  init_conf_dir
+  init_data_dir
+
   db_setup
   wait_for_db
-
-  symlink_logs_dir
-  symlink_default_backup_dir
 
   start_pmp
   wait_for_pmp
 
   while pmp_is_running
   do
-    # Move key to /config
-    save_enc_key
     sleep 5
   done
 fi
