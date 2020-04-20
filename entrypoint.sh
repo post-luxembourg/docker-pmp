@@ -69,7 +69,7 @@ init_conf_dir() {
   # Ensure PMP_HOME/conf is symlinked to /config
   if ! [[ -L "${PMP_HOME}/conf" ]]
   then
-    ln -sf /conf "${PMP_HOME}/conf"
+    ln -sf /config "${PMP_HOME}/conf"
   fi
 
   set_server_state
