@@ -70,7 +70,7 @@ check_pmp_license() {
     if ! [[ -r "$ext_license_path" ]] || ! cmp "$ext_license_path" "$pmp_license_path"
     then
       echo "License change detected. Saving it to ${ext_license_path}."
-      cp "$ext_license_path" "$pmp_license_path"
+      cp "$pmp_license_path" "$ext_license_path"
     fi
   fi
 }
