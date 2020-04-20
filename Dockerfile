@@ -54,7 +54,7 @@ RUN apt-get update && \
     bash pmp.sh install | grep "installed successfully" && \
     # Save original config and symlink the conf dir
     mv "${PMP_HOME}/conf" "${PMP_HOME}/conf.orig" && \
-    ln -sf /config "${PMP_HOME}/config" && \
+    ln -sf /config "${PMP_HOME}/conf" && \
     # Cleanup
     rm -rf /var/lib/apt/lists/* \
       /tmp/pmp_installer.bin \
