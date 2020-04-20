@@ -50,6 +50,31 @@ init_data_dir() {
   symlink_default_backup_dir
 }
 
+init_pmp_license() {
+  local ext_license_path=/data/RegisterLicense.xml
+  local pmp_license_path="${PMP_HOME}/licenses/RegisterLicense.xml"
+
+  if [[ -r "$ext_license_path" ]]
+  then
+    echo "Installing license file to $pmp_license_path"
+    cp "$ext_license_path" "$pmp_license_path"
+  fi
+}
+
+check_pmp_license() {
+  local ext_license_path=/data/RegisterLicense.xml
+  local pmp_license_path="${PMP_HOME}/licenses/RegisterLicense.xml"
+
+  if [[ -r "$pmp_license_path" ]]
+  then
+    if ! [[ -r "$ext_license_path" ]] || ! cmp "$ext_license_path" "$pmp_license_path"
+    then
+      echo "License change detected. Saving it to ${ext_license_path}."
+      cp "$ext_license_path" "$pmp_license_path"
+    fi
+  fi
+}
+
 set_server_state() {
   echo "$SERVER_STATE" > "${PMP_HOME}/conf/serverstate.conf"
 }
@@ -111,11 +136,13 @@ then
   db_setup
   wait_for_db
 
+  init_pmp_license
   start_pmp
   wait_for_pmp
 
   while pmp_is_running
   do
+    check_pmp_license
     sleep 5
   done
 fi
