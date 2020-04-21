@@ -45,9 +45,30 @@ symlink_logs_dir() {
   fi
 }
 
+sync_lib_dir() {
+  local ext_lib_path=/data/lib
+  local lockfile="${ext_lib_path}/.INIT_SYNC_DONE"
+
+  if ! [[ -e "$lockfile" ]]
+  then
+    echo "Copying lib dir to ${ext_lib_path}"
+    if cp -a "${PMP_HOME}/lib.orig" "$ext_lib_path"
+    then
+      touch "$lockfile"
+    fi
+  fi
+
+  # Ensure PMP_HOME/lib is symlinked to /data/lib
+  if ! [[ -L "${PMP_HOME}/lib" ]]
+  then
+    ln -sf "$ext_lib_path" "${PMP_HOME}/lib"
+  fi
+}
+
 init_data_dir() {
   symlink_logs_dir
   symlink_default_backup_dir
+  sync_lib_dir
 }
 
 init_pmp_license() {
@@ -80,12 +101,13 @@ set_server_state() {
 }
 
 init_conf_dir() {
-  local lockfile=/config/.INIT_SYNC_DONE
+  local ext_conf_path=/config
+  local lockfile="${ext_conf_path}/.INIT_SYNC_DONE"
 
   if ! [[ -e "$lockfile" ]]
   then
-    echo "Copying config files to /config"
-    if cp -a "${PMP_HOME}/conf.orig/"* /config
+    echo "Copying config files to ${ext_conf_path}."
+    if cp -a "${PMP_HOME}/conf.orig/"* "$ext_conf_path"
     then
       touch "$lockfile"
     fi
@@ -94,7 +116,7 @@ init_conf_dir() {
   # Ensure PMP_HOME/conf is symlinked to /config
   if ! [[ -L "${PMP_HOME}/conf" ]]
   then
-    ln -sf /config "${PMP_HOME}/conf"
+    ln -sf "$ext_conf_path" "${PMP_HOME}/conf"
   fi
 
   set_server_state

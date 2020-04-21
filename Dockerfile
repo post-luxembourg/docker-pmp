@@ -55,6 +55,9 @@ RUN apt-get update && \
     # Save original config and symlink the conf dir
     mv "${PMP_HOME}/conf" "${PMP_HOME}/conf.orig" && \
     ln -sf /config "${PMP_HOME}/conf" && \
+    # Do the same for PMP_HOME/lib (for license persistence)
+    mv "${PMP_HOME}/lib" "${PMP_HOME}/lib.orig" && \
+    ln -sf /data/lib "${PMP_HOME}/lib" && \
     # Cleanup
     rm -rf /var/lib/apt/lists/* \
       /tmp/pmp_installer.bin \
