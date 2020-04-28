@@ -2,6 +2,13 @@
 
 cd "$(readlink -f "$(dirname "$0")")" || exit 9
 
+get_latest_version() {
+  local url="https://www.manageengine.com/products/passwordmanagerpro/download-free.html"
+
+  curl -fsSL "$url" | \
+    sed -nr "s/.*The latest PMP version is (.+) \(Build ([0-9]+)\).+/\1 \2/p"
+}
+
 IMAGE=postlu/pmp
 
 EXTRA_BUILD_ARGS=()
@@ -20,8 +27,13 @@ case "$1" in
     ;;
 esac
 
+read -r version build <<< "$(get_latest_version)"
+
 docker buildx build \
   --platform "linux/amd64,linux/386" \
   "${EXTRA_BUILD_ARGS[@]}" \
-  -t "$IMAGE" \
+  -t "${IMAGE}:${version}-${build}" \
+  -t "${IMAGE}:${build}" \
+  -t "${IMAGE}:${version}" \
+  -t "${IMAGE}:latest" \
   .
