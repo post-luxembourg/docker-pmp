@@ -29,6 +29,8 @@ esac
 
 read -r version build <<< "$(get_latest_version)"
 
+echo "Building image for PMP version $version - build: $build"
+
 docker buildx build \
   --platform "linux/amd64,linux/386" \
   "${EXTRA_BUILD_ARGS[@]}" \
