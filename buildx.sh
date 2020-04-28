@@ -35,7 +35,7 @@ docker buildx build \
   --platform "linux/amd64,linux/386" \
   "${EXTRA_BUILD_ARGS[@]}" \
   -t "${IMAGE}:${version}-${build}" \
-  -t "${IMAGE}:${build}" \
+  -t "${IMAGE}:build-${build}" \
   -t "${IMAGE}:${version}" \
   -t "${IMAGE}:latest" \
   .
