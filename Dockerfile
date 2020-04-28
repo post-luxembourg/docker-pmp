@@ -59,7 +59,8 @@ RUN apt-get update && \
     mv "${PMP_HOME}/lib" "${PMP_HOME}/lib.orig" && \
     ln -sf /data/lib "${PMP_HOME}/lib" && \
     # Cleanup
-    rm -rf /var/lib/apt/lists/* \
+    rm -rf \
+      /var/lib/apt/lists/* \
       /tmp/pmp_installer.bin \
       /tmp/pmp_installer.bin.md5sum \
       /tmp/pmp.properties
