@@ -29,6 +29,12 @@ esac
 
 read -r version build <<< "$(get_latest_version)"
 
+if [[ -z "$version" ]] || [[ -z "$build" ]]
+then
+  echo "Failed to determine version and/or build" >&2
+  exit 6
+fi
+
 echo "Building image for PMP version $version - build: $build"
 
 docker buildx build \
