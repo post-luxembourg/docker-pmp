@@ -10,6 +10,8 @@ SERVER_STATE=${SERVER_STATE:-master}
 TIMEOUT_DB=${TIMEOUT_DB:-60}
 TIMEOUT_PMP=${TIMEOUT_PMP:-300}
 
+PMP_PORT=${PMP_PORT:-7272}
+
 db_setup() {
   local db_conf="${PMP_HOME}/conf/database_params.conf"
 
@@ -113,7 +115,7 @@ start_pmp() {
 }
 
 wait_for_pmp() {
-  if ! wait-for-it.sh -t "$TIMEOUT_PMP" localhost:7272
+  if ! wait-for-it.sh -t "$TIMEOUT_PMP" "localhost:${PMP_PORT}"
   then
     echo "PMP failed to start - Timeout: ${TIMEOUT_PMP}s" >&2
     exit 7

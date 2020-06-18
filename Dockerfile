@@ -5,7 +5,8 @@ ARG PMP_HOME=/srv/pmp
 ENV PMP_HOME=${PMP_HOME} \
     SERVER_STATE=master \
     TIMEOUT_DB=60 \
-    TIMEOUT_PMP=300
+    TIMEOUT_PMP=300 \
+    PMP_PORT=7272
 
 COPY pmp.properties /tmp/pmp.properties
 COPY entrypoint.sh /entrypoint.sh
