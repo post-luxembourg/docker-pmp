@@ -135,11 +135,19 @@ then
   db_setup
   wait_for_db
 
-  start_pmp
-  wait_for_pmp
+  if [[ -n "$PMP_UPGRADE" ]]
+  then
+    echo "!!! Started in upgrade mode." >&2
+    echo "The PMP service has *NOT* been started." >&2
+    echo "To disable please unset PMP_UPGRADE." >&2
+    sleep infinity
+  else
+    start_pmp
+    wait_for_pmp
 
-  while pmp_is_running
-  do
-    sleep 5
-  done
+    while pmp_is_running
+    do
+      sleep 5
+    done
+  fi
 fi
