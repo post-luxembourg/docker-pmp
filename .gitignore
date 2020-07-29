@@ -3,3 +3,4 @@ postgres.env
 config/
 data/
 .envrc
+*.ppm
