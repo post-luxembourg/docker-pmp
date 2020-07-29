@@ -4,44 +4,86 @@ cd "$(readlink -f "$(dirname "$0")")" || exit 9
 
 get_latest_version() {
   local url="https://www.manageengine.com/products/passwordmanagerpro/download-free.html"
+  local version
 
-  curl -fsSL "$url" | \
-    sed -nr "s/.*The latest PMP version is (.+) \(Build ([0-9]+)\).+/\1 \2/p"
+  version="$(curl -fsSL "$url" | \
+    sed -nr "s/.*The latest PMP version is (.+) \(Build ([0-9]+)\).+/\2 \1/p")"
+
+  if [[ -z "$version" ]]
+  then
+    {
+      echo "Failed to scrape latest version number from the PMP website"
+      echo "Resorting to biggest version number on the archive server"
+    } >&2
+    version=$(list_available_versions | head -1)
+  fi
+
+  awk '{ print $1 }' <<< "$version"
+}
+
+list_available_versions() {
+  curl https://archives2.manageengine.com/passwordmanagerpro/ | \
+    sed -nr 's|.*<a href="([0-9.]+)/".*|\1|p' | \
+    sort -nr
 }
 
 IMAGE=postlu/pmp
 
 EXTRA_BUILD_ARGS=()
 
-if [[ "$GITHUB_ACTIONS" == "true" ]]
+while true
+do
+  case "$1" in
+    push|p|--push|-p)
+      PUSH=1
+      shift
+      ;;
+    --no-cache|-n)
+      NO_CACHE=1
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [[ -n "$1" ]]
 then
-  EXTRA_BUILD_ARGS+=("--no-cache")
+  version="$1"
+else
+  version="$(get_latest_version)"
+  LATEST=1
 fi
 
-case "$1" in
-  push|p|--push|-p)
-    EXTRA_BUILD_ARGS+=("--push")
-    ;;
-  *)
-    EXTRA_BUILD_ARGS+=("--load")
-    ;;
-esac
-
-read -r version build <<< "$(get_latest_version)"
-
-if [[ -z "$version" ]] || [[ -z "$build" ]]
+if [[ "$GITHUB_ACTIONS" == "true" ]] || [[ -n "$NO_CACHE" ]]
 then
-  echo "Failed to determine version and/or build" >&2
+  EXTRA_BUILD_ARGS+=("--no-cache" "--build-arg=build_env=no_cache")
+fi
+
+if [[ -n "$PUSH" ]]
+then
+  EXTRA_BUILD_ARGS+=("--push")
+else
+  EXTRA_BUILD_ARGS+=("--load")
+fi
+
+if [[ -n "$LATEST" ]]
+then
+  EXTRA_BUILD_ARGS+=(-t "${IMAGE}:latest")
+fi
+
+if [[ -z "$version" ]]
+then
+  echo "Failed to determine version" >&2
   exit 6
 fi
 
-echo "Building image for PMP version $version - build: $build"
+echo "Building image for PMP version $version"
 
+# TODO linux/386 support
 docker buildx build \
-  --platform "linux/amd64,linux/386" \
+  --platform "linux/amd64" \
   "${EXTRA_BUILD_ARGS[@]}" \
-  -t "${IMAGE}:${version}-${build}" \
-  -t "${IMAGE}:build-${build}" \
   -t "${IMAGE}:${version}" \
-  -t "${IMAGE}:latest" \
   .

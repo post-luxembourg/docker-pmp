@@ -12,65 +12,24 @@ TIMEOUT_PMP=${TIMEOUT_PMP:-300}
 
 PMP_PORT=${PMP_PORT:-7272}
 
-db_setup() {
-  local db_conf="${PMP_HOME}/conf/database_params.conf"
-
-  # Update DB connection parameters
-  sed -ri 's/^(username)=.*/\1='"$POSTGRES_USER"'/' "$db_conf"
-  sed -ri 's/^(password)=.*/\1='"$POSTGRES_PASSWORD"'/' "$db_conf"
-  # sed -i 's|^\(url\)=.*|\1=jdbc:postgresql://'"${POSTGRES_HOST}"':'"${POSTGRES_PORT}"'/'"${POSTGRES_DB}"'?ssl=true\&sslmode=prefer|' "$db_conf"
-  sed -ri 's|^(url)=.*|\1=jdbc:postgresql://'"${POSTGRES_HOST}"':'"${POSTGRES_PORT}"'/'"${POSTGRES_DB}"'?ssl=false|' \
-    "$db_conf"
-  sed -ri 's/^(db.password.encrypted)=.*/\1=false/' "$db_conf"
-
-  # Disable startup of internal DB
-  sed -ri 's|(.*name="StartDBServer" value=").+|\1false"/>|' \
-    "${PMP_HOME}/conf/customer-config.xml"
-}
-
-symlink_default_backup_dir() {
-  # Symlink default database backup location to /data volume
-  mkdir -p /data/backups
-
-  if ! [[ -L "${PMP_HOME}/Backup" ]]
-  then
-    ln -sf "/data/backups" "${PMP_HOME}/Backup"
-  fi
-}
-
-symlink_logs_dir() {
-  mkdir -p /data/logs
-
-  if ! [[ -L "${PMP_HOME}/logs" ]]
-  then
-    ln -sf "/data/logs" "${PMP_HOME}/logs"
-  fi
-}
-
-sync_lib_dir() {
-  local ext_lib_path=/data/lib
-  local lockfile="${ext_lib_path}/.INIT_SYNC_DONE"
+sync_pmp_home_dir() {
+  local ext_pmp_home=/data
+  local lockfile="${ext_pmp_home}/.INIT_SYNC_DONE"
 
   if ! [[ -e "$lockfile" ]]
   then
-    echo "Copying lib dir to ${ext_lib_path}"
-    if cp -a "${PMP_HOME}/lib.orig" "$ext_lib_path"
+    echo "Copying PMP_HOME (${PMP_HOME}.orig) dir to ${ext_pmp_home}"
+    if cp -a "${PMP_HOME}.orig/" "$ext_pmp_home"
     then
       touch "$lockfile"
     fi
   fi
 
-  # Ensure PMP_HOME/lib is symlinked to /data/lib
-  if ! [[ -L "${PMP_HOME}/lib" ]]
+  # Ensure PMP_HOME is symlinked to /data
+  if ! [[ -L "${PMP_HOME}" ]]
   then
-    ln -sf "$ext_lib_path" "${PMP_HOME}/lib"
+    ln -sf "$ext_pmp_home" "${PMP_HOME}"
   fi
-}
-
-init_data_dir() {
-  symlink_logs_dir
-  symlink_default_backup_dir
-  sync_lib_dir
 }
 
 set_server_state() {
@@ -129,11 +88,7 @@ pmp_is_running() {
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]
 then
-  init_conf_dir
-  init_data_dir
-
-  db_setup
-  wait_for_db
+  sync_pmp_home_dir
 
   if [[ -n "$PMP_UPGRADE" ]]
   then
@@ -142,6 +97,7 @@ then
     echo "To disable please unset PMP_UPGRADE." >&2
     sleep infinity
   else
+    # TODO Start the database
     start_pmp
     wait_for_pmp
 
