@@ -1,9 +1,9 @@
 ARG BASE_IMAGE=ubuntu:20.04
 ARG BUILD_ENV=cached
 
-FROM ${BASE_IMAGE} as build_cached
 # TODO i386 support
-ONBUILD COPY ./ManageEngine_PMP_64bit.bin /tmp/pmp_installer.bin
+# FROM ${BASE_IMAGE} as build_cached
+# ONBUILD COPY ./ManageEngine_PMP_64bit.bin /tmp/pmp_installer.bin
 
 FROM ${BASE_IMAGE} as build_no_cache
 
