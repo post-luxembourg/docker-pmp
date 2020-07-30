@@ -3,7 +3,7 @@
 set -euxo
 
 PMP_VERSION="$1"
-PMP_TMP_HOME="${PMP_HOME}.orig"
+PMP_TMP_HOME="/srv/PMP.orig"
 PMP_INSTALLER="/tmp/pmp_installer.bin"
 
 install_dependencies() {
@@ -42,6 +42,7 @@ install_pmp() {
 
   chmod +x "${PMP_INSTALLER}"
 
+  mkdir -p "$(dirname "$PMP_HOME")"
   # Update PMP_HOME in properties (/srv/pmp was used as install path at the
   # time of creation of the .properties file)
   sed -i "s|/srv/pmp|${PMP_HOME}|" /tmp/pmp.properties

@@ -2,7 +2,7 @@ ARG BASE_IMAGE=ubuntu:20.04
 
 FROM ${BASE_IMAGE}
 
-ARG PMP_HOME=/srv/pmp
+ARG PMP_HOME=/data/PMP
 ARG PMP_VERSION=10404
 
 ENV PMP_VERSION=$PMP_VERSION \
@@ -18,10 +18,10 @@ COPY install.sh /install.sh
 
 RUN bash -x /install.sh "$PMP_VERSION" && rm -f /install.sh
 
-WORKDIR /data/pmp
+WORKDIR ${PMP_HOME}
 
 # https://www.manageengine.com/products/passwordmanagerpro/help/installation.html#Ports
-EXPOSE 5522/tcp 7070/tcp 7272/tcp 7273/tcp
+EXPOSE 2345/tcp 5522/tcp 7070/tcp 7272/tcp 7273/tcp
 
 ENTRYPOINT ["/entrypoint.sh"]
 

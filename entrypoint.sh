@@ -13,22 +13,16 @@ TIMEOUT_PMP=${TIMEOUT_PMP:-300}
 PMP_PORT=${PMP_PORT:-7272}
 
 sync_pmp_home_dir() {
-  local ext_pmp_home=/data
-  local lockfile="${ext_pmp_home}/.INIT_SYNC_DONE"
+  local PMP_TMP_HOME="/srv/PMP.orig"
+  local lockfile="${PMP_HOME}/.INIT_SYNC_DONE"
 
   if ! [[ -e "$lockfile" ]]
   then
-    echo "Copying PMP_HOME (${PMP_HOME}.orig) dir to ${ext_pmp_home}"
-    if cp -a "${PMP_HOME}.orig/" "$ext_pmp_home"
+    echo "Copying PMP_HOME contents to $PMP_HOME"
+    if cp -a "$PMP_TMP_HOME" "$PMP_HOME"
     then
       touch "$lockfile"
     fi
-  fi
-
-  # Ensure PMP_HOME is symlinked to /data
-  if ! [[ -L "${PMP_HOME}" ]]
-  then
-    ln -sf "$ext_pmp_home" "${PMP_HOME}"
   fi
 }
 
