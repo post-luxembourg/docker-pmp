@@ -2,6 +2,7 @@
 
 set -euxo
 
+PMP_VERSION="$1"
 PMP_TMP_HOME="${PMP_HOME}.orig"
 PMP_INSTALLER="/tmp/pmp_installer.bin"
 
@@ -12,7 +13,7 @@ install_dependencies() {
   curl -fsSL https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
     -o /usr/bin/wait-for-it.sh
 
-  chmod +x "${PMP_INSTALLER}" /usr/bin/wait-for-it.sh
+  chmod +x /usr/bin/wait-for-it.sh
 }
 
 cleanup() {

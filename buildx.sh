@@ -56,9 +56,17 @@ else
   LATEST=1
 fi
 
+if [[ -z "$version" ]]
+then
+  echo "Failed to determine version" >&2
+  exit 6
+fi
+
+EXTRA_BUILD_ARGS+=("--build-arg" "PMP_VERSION=${version}")
+
 if [[ "$GITHUB_ACTIONS" == "true" ]] || [[ -n "$NO_CACHE" ]]
 then
-  EXTRA_BUILD_ARGS+=("--no-cache" "--build-arg=build_env=no_cache")
+  EXTRA_BUILD_ARGS+=("--no-cache")
 fi
 
 if [[ -n "$PUSH" ]]
@@ -73,16 +81,11 @@ then
   EXTRA_BUILD_ARGS+=(-t "${IMAGE}:latest")
 fi
 
-if [[ -z "$version" ]]
-then
-  echo "Failed to determine version" >&2
-  exit 6
-fi
-
 echo "Building image for PMP version $version"
 
 # TODO linux/386 support
 docker buildx build \
+  --progress plain \
   --platform "linux/amd64" \
   "${EXTRA_BUILD_ARGS[@]}" \
   -t "${IMAGE}:${version}" \
